@@ -12,7 +12,7 @@ namespace SymEngine {
 
 using fp_t = flint::fmpq_polyxx;
 // Univariate Rational Coefficient Power SeriesBase using Flint
-class URatPSeriesFlint : public SeriesBase<fp_t, flint::fmpqxx, URatPSeriesFlint, false> {
+class URatPSeriesFlint : public SeriesBase<fp_t, flint::fmpqxx, URatPSeriesFlint> {
 public:
     URatPSeriesFlint(const fp_t p, const std::string varname, const unsigned degree);
     IMPLEMENT_TYPEID(URATPSERIESFLINT)
@@ -48,6 +48,36 @@ public:
     }
     static inline fp_t series_exp(const fp_t &s, const fp_t& var, unsigned int   prec) {
         return fp_t(exp_series(s, prec));
+    }
+    static inline fp_t series_tan(const fp_t &s, const fp_t& var, unsigned int   prec) {
+        return fp_t(tan_series(s, prec));
+    }
+    static inline fp_t series_cos(const fp_t &s, const fp_t& var, unsigned int   prec) {
+        return fp_t(cos_series(s, prec));
+    }
+    static inline fp_t series_sin(const fp_t &s, const fp_t& var, unsigned int   prec) {
+        return fp_t(sin_series(s, prec));
+    }
+    static inline fp_t series_atan(const fp_t &s, const fp_t& var, unsigned int   prec) {
+        return fp_t(atan_series(s, prec));
+    }
+    static inline fp_t series_atanh(const fp_t &s, const fp_t& var, unsigned int   prec) {
+        return fp_t(atanh_series(s, prec));
+    }
+    static inline fp_t series_asin(const fp_t &s, const fp_t& var, unsigned int   prec) {
+        return fp_t(asin_series(s, prec));
+    }
+    static inline fp_t series_asinh(const fp_t &s, const fp_t& var, unsigned int   prec) {
+        return fp_t(asinh_series(s, prec));
+    }
+    static inline fp_t series_sinh(const fp_t &s, const fp_t& var, unsigned int   prec) {
+        return fp_t(sinh_series(s, prec));
+    }
+    static inline fp_t series_cosh(const fp_t &s, const fp_t& var, unsigned int   prec) {
+        return fp_t(cosh_series(s, prec));
+    }
+    static inline fp_t series_tanh(const fp_t &s, const fp_t& var, unsigned int   prec) {
+        return fp_t(tanh_series(s, prec));
     }
 };
 
