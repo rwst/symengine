@@ -6,67 +6,23 @@
 #ifndef SYMENGINE_SERIES_H
 #define SYMENGINE_SERIES_H
 
+#include <string>
 #include <list>
 
-#include <symengine/polynomial.h>
+#include <symengine/number.h>
+#include <symengine/dict.h>
+#include <symengine/integer.h>
 
 namespace SymEngine {
-//! UnivariateSeries Class
-class UnivariateSeries : public Basic {
-public:
-    //! `var_` : Variable of the UnivariateSeries
-    //! `poly_` : holds the UnivariatePolynomial of the series
-    //! `prec_` : precision of the UnivariateSeries, i.e. self = poly + O(var^prec)
-    // UnivariateSeries 1 + 2*x + x**2 + O(x**5) has dict_ = {{0, 1}, {1, 2}, {2, 1}} with var_ = "x" and prec_ = 5
-    RCP<const Symbol> var_;
-    RCP<const UnivariatePolynomial> poly_;
-    unsigned int prec_;
-public:
-    IMPLEMENT_TYPEID(UNIVARIATESERIES)
-    //! Constructor of UnivariateSeries class
-    UnivariateSeries(const RCP<const Symbol> &var, const unsigned int &precision, const RCP<const UnivariatePolynomial> &poly);
-    UnivariateSeries(const RCP<const Symbol> &var, const unsigned int& precision, const unsigned int& max_exp, map_uint_mpz&& dict);
-    UnivariateSeries(const RCP<const Symbol> &var, const unsigned int &precision, const map_uint_mpz &dict);
-    //! Constructor using a dense vector of mpz_class coefficients
-    UnivariateSeries(const RCP<const Symbol> &var, const unsigned int &precision, const std::vector<mpz_class> &v);
 
-    static RCP<const UnivariateSeries> create(const RCP<const Symbol> &var,
-            const unsigned int &prec, const std::vector<mpz_class> &v) {
-        return make_rcp<const UnivariateSeries>(var, prec, v);
-    }
-
-    //! \return true if canonical
-    bool is_canonical(const UnivariatePolynomial&, const unsigned int &) const;
-    //! \return size of the hash
-    std::size_t __hash__() const;
-    /*! Equality comparator
-     * \param o - Object to be compared with
-     * \return whether the 2 objects are equal
-     * */
-
-    bool operator==(const UnivariateSeries &o) const {
-        return (eq(*var_, *o.var_) and poly_->__eq__(*o.poly_) and prec_ == o.prec_);
-    }
-    bool __eq__(const Basic &o) const;
-    int compare(const Basic &o) const;
-
-    std::string __str__() const;
-    virtual vec_basic get_args() const { return {}; }
+class SeriesCoeffInterface {
+    virtual RCP<const Basic> as_basic() const =0;
+    virtual umap_int_basic as_dict() const =0;
+    virtual RCP<const Basic> get_coeff(int) const =0;
 };
 
-
-inline RCP<const UnivariateSeries> univariate_series(RCP<const Symbol> i,       unsigned int prec, const map_uint_mpz& dict)
-{
-    return make_rcp<const UnivariateSeries>(i, prec, dict);
-}
-
-RCP<const UnivariateSeries> add_uni_series (const UnivariateSeries& a, const UnivariateSeries &b);
-RCP<const UnivariateSeries> neg_uni_series (const UnivariateSeries& a);
-RCP<const UnivariateSeries> sub_uni_series (const UnivariateSeries& a, const UnivariateSeries &b);
-RCP<const UnivariateSeries> mul_uni_series (const UnivariateSeries& a, const UnivariateSeries &b);
-
 template <typename Poly, typename Coeff, typename Series>
-class SeriesBase : public Number {
+class SeriesBase : public Number, SeriesCoeffInterface {
 public:
     Poly p_;
     std::string var_;
@@ -587,20 +543,11 @@ public:
     static inline Coeff log(const Coeff& c) {
         throw std::runtime_error("log(const) not implemented");
     }
-
-    /*
-     * int ldegree(Poly &s);
-     * Coeff& find_cf(Poly &s, int n);
-     * Poly var(const std::string &s);
-     * Poly pow(Poly &s, int n);
-     * Poly mul(Poly &a, Poly &b, unsigned prec);
-     * Poly diff(Poly &a, Poly &var);
-     * Poly integrate(Poly &a, Poly &var);
-     * Coeff root(Coeff &c, unsigned n);
-     * Poly subs(Poly &s, Poly &var, Poly& new, unsigned prec);
-     * Poly/Coeff convert(Number &n)
-     */
 };
+
+umap_int_basic series(const RCP<const Basic> &ex, const RCP<const Symbol> &var, unsigned int prec);
+
+umap_int_basic series_invfunc(const RCP<const Basic> &ex, const RCP<const Symbol> &var, unsigned int prec);
 
 }  //SymEngine
 #endif
