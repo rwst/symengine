@@ -91,7 +91,8 @@ public:
         if (not s.is_zero())
             throw std::logic_error("lambertw(const) not Implemented");
 
-        fp_t p1(0);
+        fp_t p1;
+        p1.set_zero();
 
         auto steps = step_list(prec);
         for (const auto step : steps) {
@@ -102,8 +103,49 @@ public:
         }
         return p1;
     }
-};
 
+    static inline fp_t series_nthroot(const fp_t &s, int n, const fp_t &var, unsigned int prec) {
+        fp_t one;
+        one.set_one();
+        if (n == 0)
+            return one;
+        if (n == 1)
+            return s;
+        if (n == -1)
+            return series_invert(s, var, prec);
+
+        const short ldeg = ldegree(s);
+        if (ldeg % n != 0) {
+            throw std::runtime_error("Puiseux series not implemented.");
+        }
+        fp_t ss = s;
+        if (ldeg != 0) {
+            ss = s * pow(var, -ldeg, prec);
+        }
+        flint::fmpqxx ct = find_cf(ss, var, 0);
+        bool do_inv = false;
+        if (n < 0) {
+            n = -n;
+            do_inv = true;
+        }
+
+        flint::fmpqxx ctroot = root(ct, n);
+        fp_t res_p = one, sn = fp_t(ss / ct);
+        auto steps = step_list(prec);
+        for (const auto step : steps) {
+            fp_t t = mul(pow(res_p, n + 1, step), sn, step);
+            res_p += (res_p - t) / n;
+        }
+        if (ldeg != 0) {
+            res_p *= pow(var, ldeg / n, prec);
+        }
+        if (do_inv)
+            return fp_t(res_p * ctroot);
+        else
+            return fp_t(series_invert(res_p, var, prec) * ctroot);
+    }
+
+};
 } // SymEngine
 
 #endif // HAVE_SYMENGINE_FLINT

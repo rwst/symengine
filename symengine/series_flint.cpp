@@ -1,6 +1,7 @@
 #include <symengine/series_flint.h>
 #include <symengine/series_visitor.h>
 
+#ifdef HAVE_SYMENGINE_FLINT
 namespace SymEngine {
 
 URatPSeriesFlint::URatPSeriesFlint(fp_t p, const std::string varname, const unsigned degree)
@@ -167,4 +168,5 @@ fp_t URatPSeriesFlint::subs(const fp_t &s, const fp_t &var, const fp_t &r, unsig
 }
 
 }
+#endif // HAVE_SYMENGINE_FLINT
 
