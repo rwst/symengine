@@ -18,6 +18,10 @@ public:
     IMPLEMENT_TYPEID(URATPSERIESFLINT)
     virtual int compare(const Basic &o) const;
     virtual std::size_t __hash__() const;
+    virtual RCP<const Basic> as_basic() const;
+    virtual umap_int_basic as_dict() const;
+    virtual RCP<const Basic> get_coeff(int) const;
+    
     static RCP<const URatPSeriesFlint> series(const RCP<const Basic> &t, const std::string &x, unsigned int prec);
     static flint::fmpzxx convert(const Integer &x);
     static flint::fmpqxx convert(const mpq_class &x);
@@ -70,6 +74,9 @@ public:
     static inline fp_t series_asinh(const fp_t &s, const fp_t& var, unsigned int   prec) {
         return fp_t(asinh_series(s, prec));
     }
+    static inline fp_t series_acos(const fp_t &s, const fp_t& var, unsigned int prec) {
+        throw std::runtime_error("acos() not implemented");
+    }
     static inline fp_t series_sinh(const fp_t &s, const fp_t& var, unsigned int   prec) {
         return fp_t(sinh_series(s, prec));
     }
@@ -78,6 +85,22 @@ public:
     }
     static inline fp_t series_tanh(const fp_t &s, const fp_t& var, unsigned int   prec) {
         return fp_t(tanh_series(s, prec));
+    }
+    static inline fp_t series_lambertw(const fp_t &s, const fp_t& var, unsigned int prec) {
+        flint::fmpqxx c(s.get_coeff(0));
+        if (not s.is_zero())
+            throw std::logic_error("lambertw(const) not Implemented");
+
+        fp_t p1(0);
+
+        auto steps = step_list(prec);
+        for (const auto step : steps) {
+            const fp_t e(series_exp(p1, var, step));
+            const fp_t p2(mul(e, p1, step) - s);
+            const fp_t p3(series_invert(mul(e, fp_t(p1 + fp_t(1)), step), var, step));
+            p1 -= mul(p2, p3, step);
+        }
+        return p1;
     }
 };
 

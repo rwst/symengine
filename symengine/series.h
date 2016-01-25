@@ -329,7 +329,7 @@ public:
 
     static inline Poly series_acos(const Poly &s, const Poly& var, unsigned int prec) {
         const Coeff c(Series::find_cf(s, var, 0));
-        return Poly(Poly(Series::acos(c)) - series_asin(Poly(s - Poly(c)), var, prec));
+        return Series::acos(c) - series_asin(s - c, var, prec);
     }
 
     static inline Poly series_cos(const Poly &s, const Poly& var, unsigned int prec) {

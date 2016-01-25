@@ -31,6 +31,60 @@ std::size_t URatPSeriesFlint::__hash__() const {
     return seed;
 }
 
+RCP<const Basic> URatPSeriesFlint::as_basic() const
+{
+    RCP<const Symbol> x = symbol(var_);
+    umap_basic_num dict_;
+    mpq_class gc;
+    for (int n=0; n<degree_; n++) {
+        const flint::fmpqxx fc(p_.get_coeff(n));
+        if (not fc.is_zero()) {
+            fmpq_get_mpq(gc.get_mpq_t(), fc._data().inner);
+            gc.canonicalize();
+            RCP<const Number> basic;
+            if (gc.get_den() == 1)
+                basic = integer(gc.get_num());
+            else
+                basic = Rational::from_mpq(gc);
+            auto term = SymEngine::mul(SymEngine::pow(x, SymEngine::integer(n)), basic);
+            Add::coef_dict_add_term(outArg(basic), dict_, one, term);
+        }
+    }
+    return std::move(Add::from_dict(one, std::move(dict_)));
+}
+
+umap_int_basic URatPSeriesFlint::as_dict() const
+{
+    umap_int_basic map;
+    mpq_class gc;
+    for (int n=0; n<degree_; n++) {
+        const flint::fmpqxx fc(p_.get_coeff(n));
+        if (not fc.is_zero()) {
+            fmpq_get_mpq(gc.get_mpq_t(), fc._data().inner);
+            gc.canonicalize();
+            RCP<const Number> basic;
+            if (gc.get_den() == 1)
+                basic = integer(gc.get_num());
+            else
+                basic = Rational::from_mpq(gc);
+            map[n] = basic;
+        }
+    }
+    return map;
+}
+
+RCP<const Basic> URatPSeriesFlint::get_coeff(int n) const
+{
+    const flint::fmpqxx fc(p_.get_coeff(n));
+    mpq_class gc;
+    fmpq_get_mpq(gc.get_mpq_t(), fc._data().inner);
+    gc.canonicalize();
+    if (gc.get_den() == 1)
+        return integer(gc.get_num());
+    else
+        return Rational::from_mpq(gc);
+}
+
 int URatPSeriesFlint::compare(const Basic &o) const {
     SYMENGINE_ASSERT(is_a<URatPSeriesFlint>(o))
     const URatPSeriesFlint &s = static_cast<const URatPSeriesFlint &>(o);
